@@ -12,13 +12,27 @@ defmodule Challenge.Permits do
   @type filters :: [filter()]
 
   @doc """
-  Creates a permit based on the attributes provided.
+  Upserts a permit based on the attributes provided.
+  If the location_id already exists, the record will be updated.
   """
-  @spec create_permit(map()) :: {:ok, Permit.t()} | {:error, Ecto.Changeset.t(Permit.t())}
-  def create_permit(attrs) do
+  @spec upsert_permit(map()) :: {:ok, Permit.t()} | {:error, Ecto.Changeset.t(Permit.t())}
+  def upsert_permit(attrs) do
     %Permit{}
     |> Permit.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(
+      # location_id is a potential conflict.
+      conflict_target: [:location_id],
+
+      # When we encounter a conflict update most fields. 
+      on_conflict: {:replace_all_except, [:id, :inserted_at]},
+
+      # We need to ensure we read back all of the fields, particularly 
+      # on conflicts. For example, the Permit returned on conflict will 
+      # have the id that we _attempted_ to insert, instead of the one 
+      # in the database.
+      # [Further reading](https://hexdocs.pm/ecto/Ecto.Repo.html#c:insert/2-upserts)
+      returning: true
+    )
   end
 
   @doc """
