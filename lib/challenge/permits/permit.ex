@@ -16,7 +16,7 @@ defmodule Challenge.Permits.Permit do
     field :permit_holder, :string
     field :food_items, :string
     field :hours_of_operation, :string
-    field :status, Ecto.Enum, values: [:requested, :approved, :expired]
+    field :status, Ecto.Enum, values: [:requested, :approved, :issued, :expired, :suspend]
 
     timestamps()
   end
