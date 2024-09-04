@@ -11,7 +11,7 @@ defmodule Challenge.PermitsTest do
         location_description: "1ST ST: LYMAN AVE to TAPESTRY RDG",
         permit_number: "23MFF-00030",
         permit_holder: "Bill's Snacks",
-        food_items: "American Food: Hog dogs: pretzels: beverages",
+        food_items: "American Food: Hot dogs: pretzels: beverages",
         hours_of_operation: "Mo-Fr:12PM-8PM",
         status: "approved"
       }
@@ -19,26 +19,79 @@ defmodule Challenge.PermitsTest do
       assert {:ok, %Permit{}} = Permits.create_permit(attrs)
     end
 
-    test "invalid attrs do not create a permit" do
+    test "invalid attrs will not create a permit" do
       assert {:error, %Ecto.Changeset{}} = Permits.create_permit(%{})
     end
   end
 
   describe "list_permits/1" do
     test "filter by status with case insensitivity" do
-      %{id: inserted_id} = %{"status" => "approved"} |> permit() |> insert!()
+      %{id: inserted_id} =
+        %{"status" => "approved"}
+        |> permit()
+        |> insert!()
 
-      params = %{
-        "status" => "APPROVED"
-      }
+      filters = [status: "APPROVED"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(params)
+      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
 
-      params = %{
-        "status" => "expired"
-      }
+      filters = [status: "expired"]
 
-      assert [] = Permits.list_permits(params)
+      assert [] = Permits.list_permits(filters)
+    end
+
+    test "filter by 'contains q', match location_description, case insensitive" do
+      %{id: inserted_id} =
+        %{"location_description" => "TAPESTRY RDG"}
+        |> permit()
+        |> insert!()
+
+      filters = [q: "tapestry"]
+
+      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+    end
+
+    test "filter by 'contains q', match permit_number, case insensitive" do
+      %{id: inserted_id} =
+        %{"permit_number" => "23MFF-00030"}
+        |> permit()
+        |> insert!()
+
+      filters = [q: "mff-00"]
+
+      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+    end
+
+    test "filter by 'contains q', match permit_holder, case insensitive" do
+      %{id: inserted_id} =
+        %{"permit_holder" => "Bill's Snacks"}
+        |> permit()
+        |> insert!()
+
+      filters = [q: "bill's"]
+
+      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+    end
+
+    test "filter by 'contains q', match food_items, case insensitive" do
+      %{id: inserted_id} =
+        %{"food_items" => "American Food: Hot dogs: Pretzels: beverages"}
+        |> permit()
+        |> insert!()
+
+      filters = [q: "pretzel"]
+
+      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+    end
+
+    test "filter by 'contains q', no matches" do
+      %{}
+      |> permit()
+      |> insert!()
+
+      filters = [q: "not-in-permit"]
+
+      assert [] = Permits.list_permits(filters)
     end
   end
 
@@ -48,7 +101,7 @@ defmodule Challenge.PermitsTest do
       "location_description" => "1ST ST => LYMAN AVE to TAPESTRY RDG",
       "permit_number" => "23MFF-00030",
       "permit_holder" => "Bill's Snacks",
-      "food_items" => "American Food: Hog dogs: pretzels: beverages",
+      "food_items" => "American Food: Hot dogs: pretzels: beverages",
       "hours_of_operation" => "Mo-Fr:12PM-8PM",
       "status" => "approved"
     }

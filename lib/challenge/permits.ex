@@ -8,6 +8,9 @@ defmodule Challenge.Permits do
   alias Challenge.Repo
   alias Challenge.Permits.Permit
 
+  @type filter :: {:q, String.t()} | {:status, String.t()}
+  @type filters :: [filter()]
+
   @doc """
   Creates a permit based on the attributes provided.
   """
@@ -19,30 +22,47 @@ defmodule Challenge.Permits do
   end
 
   @doc """
-  Lists permits based on the parameters provided.
+  Lists permits based on the filters provided.
   """
-  @spec list_permits(map()) :: list(Permit.t())
-  def list_permits(params \\ %{}) do
+  @spec list_permits(filters) :: list(Permit.t())
+  def list_permits(filters \\ []) do
+    # In order to stabilize the permit order we'll first
+    # sort by the permit holder and then the permit id.
     query =
       from p in Permit,
         as: :permit,
-        order_by: [asc: p.permit_holder]
+        order_by: [asc: p.permit_holder, asc: p.id]
 
     query
-    |> build_query(params)
+    |> apply_filters(filters)
     |> Repo.all()
   end
 
-  defp build_query(query, params) do
-    Enum.reduce(params, query, &param_query/2)
+  defp apply_filters(query, filter) do
+    Enum.reduce(filter, query, &filter_query/2)
   end
 
-  defp param_query({"status", v}, query) do
+  # Filter by the value of :q. It can be contained in
+  # any of location_description, permit_number, permit_holder,
+  # or food_items and is a case insensitive comparison.
+  defp filter_query({:q, v}, query) do
+    contains_v = "%#{v}%"
+
+    from [permit: permit] in query,
+      where: ilike(permit.location_description, ^contains_v),
+      or_where: ilike(permit.permit_number, ^contains_v),
+      or_where: ilike(permit.permit_holder, ^contains_v),
+      or_where: ilike(permit.food_items, ^contains_v)
+  end
+
+  # Filter by a case insensitive status.
+  defp filter_query({:status, v}, query) do
     v = String.downcase(v)
 
     from [permit: permit] in query,
       where: permit.status == ^v
   end
 
-  defp param_query(_kv, query), do: query
+  # If there are other keys in the filter, ignore them.
+  defp filter_query(_kv, query), do: query
 end

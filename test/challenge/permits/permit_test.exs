@@ -10,7 +10,7 @@ defmodule Challenge.Permits.PermitTest do
         location_description: "1ST ST: LYMAN AVE to TAPESTRY RDG",
         permit_number: "23MFF-00030",
         permit_holder: "Bill's Snacks",
-        food_items: "American Food: Hog dogs: pretzels: beverages",
+        food_items: "American Food: Hot dogs: pretzels: beverages",
         hours_of_operation: "Mo-Fr:12PM-8PM",
         status: "approved"
       }
