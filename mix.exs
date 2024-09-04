@@ -41,6 +41,7 @@ defmodule Challenge.MixProject do
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:postgrex, ">= 0.0.0"},
+      {:scrivener_ecto, "~> 2.0"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"}
     ]
