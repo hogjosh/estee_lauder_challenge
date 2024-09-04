@@ -1,11 +1,13 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Challenge.Repo.insert!(%Challenge.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+# Use permits.csv in the same directory as this file.
+# Commit to the database in chunks.
+"#{__DIR__}/permits.csv"
+|> File.stream!()
+|> Challenge.CSVSeed.stream_permits()
+|> Stream.chunk_every(100)
+|> Enum.each(fn chunk ->
+  Challenge.Repo.transaction(fn ->
+    Enum.each(chunk, fn attrs ->
+      {:ok, _permit} = Challenge.Permits.create_permit(attrs)
+    end)
+  end)
+end)
