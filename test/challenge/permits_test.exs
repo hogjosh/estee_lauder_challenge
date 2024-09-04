@@ -3,6 +3,7 @@ defmodule Challenge.PermitsTest do
 
   alias Challenge.Permits
   alias Challenge.Permits.Permit
+  alias Scrivener.Page
 
   describe "upsert_permit/1" do
     test "valid attrs insert a permit" do
@@ -62,7 +63,7 @@ defmodule Challenge.PermitsTest do
     end
   end
 
-  describe "list_permits/1" do
+  describe "page_permits/1" do
     test "filter by status with case insensitivity" do
       %{id: inserted_id} =
         %{"status" => "approved"}
@@ -71,11 +72,15 @@ defmodule Challenge.PermitsTest do
 
       filters = [status: "APPROVED"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+      assert %Page{
+               entries: [%Permit{id: ^inserted_id}]
+             } = Permits.page_permits(filters)
 
       filters = [status: "expired"]
 
-      assert [] = Permits.list_permits(filters)
+      assert %Page{
+               entries: []
+             } = Permits.page_permits(filters)
     end
 
     test "filter by 'contains q', match location_description, case insensitive" do
@@ -86,7 +91,9 @@ defmodule Challenge.PermitsTest do
 
       filters = [q: "tapestry"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+      assert %Page{
+               entries: [%Permit{id: ^inserted_id}]
+             } = Permits.page_permits(filters)
     end
 
     test "filter by 'contains q', match permit_number, case insensitive" do
@@ -97,7 +104,9 @@ defmodule Challenge.PermitsTest do
 
       filters = [q: "mff-00"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+      assert %Page{
+               entries: [%Permit{id: ^inserted_id}]
+             } = Permits.page_permits(filters)
     end
 
     test "filter by 'contains q', match permit_holder, case insensitive" do
@@ -108,7 +117,9 @@ defmodule Challenge.PermitsTest do
 
       filters = [q: "bill's"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+      assert %Page{
+               entries: [%Permit{id: ^inserted_id}]
+             } = Permits.page_permits(filters)
     end
 
     test "filter by 'contains q', match food_items, case insensitive" do
@@ -119,7 +130,9 @@ defmodule Challenge.PermitsTest do
 
       filters = [q: "pretzel"]
 
-      assert [%Permit{id: ^inserted_id}] = Permits.list_permits(filters)
+      assert %Page{
+               entries: [%Permit{id: ^inserted_id}]
+             } = Permits.page_permits(filters)
     end
 
     test "filter by 'contains q', no matches" do
@@ -129,7 +142,27 @@ defmodule Challenge.PermitsTest do
 
       filters = [q: "not-in-permit"]
 
-      assert [] = Permits.list_permits(filters)
+      assert %Page{
+               entries: []
+             } = Permits.page_permits(filters)
+    end
+
+    test "pagination" do
+      for n <- 1..5 do
+        %{"location_id" => n}
+        |> permit()
+        |> upsert!()
+      end
+
+      opts = [page: 2, page_size: 1]
+
+      assert %Page{
+               page_number: 2,
+               page_size: 1,
+               entries: [%Permit{}],
+               total_entries: 5,
+               total_pages: 5
+             } = Permits.page_permits(opts)
     end
   end
 

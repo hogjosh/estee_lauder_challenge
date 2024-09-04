@@ -8,8 +8,9 @@ defmodule Challenge.Permits do
   alias Challenge.Repo
   alias Challenge.Permits.Permit
 
-  @type filter :: {:q, String.t()} | {:status, String.t()}
-  @type filters :: [filter()]
+  @type page_opt ::
+          {:page, integer()} | {:page_size, integer()} | {:q, String.t()} | {:status, String.t()}
+  @type page_opts :: [page_opt()]
 
   @doc """
   Upserts a permit based on the attributes provided.
@@ -36,10 +37,18 @@ defmodule Challenge.Permits do
   end
 
   @doc """
-  Lists permits based on the filters provided.
+  Returns a page of users based on the options provided.
+
+  ## Options
+  * `:page` - the page number to load, defaults to 1
+  * `:page_size` - the number of entries per page, defaults to 20
+  * `:q` - search term to query for
+  * `:status` - status to filter the results by
   """
-  @spec list_permits(filters) :: list(Permit.t())
-  def list_permits(filters \\ []) do
+  @spec page_permits(page_opts()) :: Scrivener.Page.t(Permit.t())
+  def page_permits(opts \\ []) do
+    pagination = Keyword.take(opts, [:page, :page_size])
+
     # In order to stabilize the permit order we'll first
     # sort by the permit holder and then the permit id.
     query =
@@ -48,12 +57,13 @@ defmodule Challenge.Permits do
         order_by: [asc: p.permit_holder, asc: p.id]
 
     query
-    |> apply_filters(filters)
-    |> Repo.all()
+    |> apply_filters(opts)
+    |> Repo.paginate(pagination)
   end
 
-  defp apply_filters(query, filter) do
-    Enum.reduce(filter, query, &filter_query/2)
+  # Apply the filters to the query
+  defp apply_filters(query, filters) do
+    Enum.reduce(filters, query, &filter_query/2)
   end
 
   # Filter by the value of :q. It can be contained in
