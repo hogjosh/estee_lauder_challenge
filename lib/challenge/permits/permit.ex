@@ -44,5 +44,6 @@ defmodule Challenge.Permits.Permit do
     ])
     |> Changeset.validate_length(:permit_number, max: 255)
     |> Changeset.validate_length(:hours_of_operation, max: 255)
+    |> Changeset.unique_constraint(:location_id)
   end
 end
