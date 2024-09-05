@@ -28,7 +28,7 @@ defmodule ChallengeWeb.UserControllerTest do
         |> upsert!()
       end
 
-      conn = get(conn, ~p"/api/permits?status=approved")
+      conn = get(conn, ~p"/api/permits", %{"status" => "approved"})
 
       assert %{
                "entries" => entries,
@@ -51,7 +51,7 @@ defmodule ChallengeWeb.UserControllerTest do
         |> upsert!()
       end
 
-      conn = get(conn, ~p"/api/permits?q=food%202")
+      conn = get(conn, ~p"/api/permits", %{"q" => "food 2"})
 
       assert %{
                "entries" => entries,
@@ -74,7 +74,7 @@ defmodule ChallengeWeb.UserControllerTest do
       page = 2
       page_size = 1
 
-      conn = get(conn, ~p"/api/permits?page=#{page}&page_size=#{page_size}")
+      conn = get(conn, ~p"/api/permits", %{"page" => page, "page_size" => page_size})
 
       assert %{
                "entries" => entries,

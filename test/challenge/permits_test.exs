@@ -64,87 +64,87 @@ defmodule Challenge.PermitsTest do
   end
 
   describe "page_permits/1" do
-    test "filter by status with case insensitivity" do
+    test "opts by status with case insensitivity" do
       %{id: inserted_id} =
         %{"status" => "approved"}
         |> permit()
         |> upsert!()
 
-      filters = [status: "APPROVED"]
+      opts = [status: "APPROVED"]
 
       assert %Page{
                entries: [%Permit{id: ^inserted_id}]
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
 
-      filters = [status: "expired"]
+      opts = [status: "expired"]
 
       assert %Page{
                entries: []
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
-    test "filter by 'contains q', match location_description, case insensitive" do
+    test "search matches location_description, case insensitive" do
       %{id: inserted_id} =
         %{"location_description" => "TAPESTRY RDG"}
         |> permit()
         |> upsert!()
 
-      filters = [q: "tapestry"]
+      opts = [search: "tapestry"]
 
       assert %Page{
                entries: [%Permit{id: ^inserted_id}]
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
-    test "filter by 'contains q', match permit_number, case insensitive" do
+    test "search matches permit_number, case insensitive" do
       %{id: inserted_id} =
         %{"permit_number" => "23MFF-00030"}
         |> permit()
         |> upsert!()
 
-      filters = [q: "mff-00"]
+      opts = [search: "mff-00"]
 
       assert %Page{
                entries: [%Permit{id: ^inserted_id}]
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
-    test "filter by 'contains q', match permit_holder, case insensitive" do
+    test "search matches permit_holder, case insensitive" do
       %{id: inserted_id} =
         %{"permit_holder" => "Bill's Snacks"}
         |> permit()
         |> upsert!()
 
-      filters = [q: "bill's"]
+      opts = [search: "bill's"]
 
       assert %Page{
                entries: [%Permit{id: ^inserted_id}]
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
-    test "filter by 'contains q', match food_items, case insensitive" do
+    test "search matches food_items, case insensitive" do
       %{id: inserted_id} =
         %{"food_items" => "American Food: Hot dogs: Pretzels: beverages"}
         |> permit()
         |> upsert!()
 
-      filters = [q: "pretzel"]
+      opts = [search: "pretzel"]
 
       assert %Page{
                entries: [%Permit{id: ^inserted_id}]
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
-    test "filter by 'contains q', no matches" do
+    test "search no matches" do
       %{}
       |> permit()
       |> upsert!()
 
-      filters = [q: "not-in-permit"]
+      opts = [search: "not-in-permit"]
 
       assert %Page{
                entries: []
-             } = Permits.page_permits(filters)
+             } = Permits.page_permits(opts)
     end
 
     test "pagination" do

@@ -20,7 +20,7 @@ defmodule ChallengeWeb.PermitController do
   # supported by the Permits context module.
   defp build_page_opts(params) do
     [
-      q: params["q"],
+      search: params["q"],
       status: params["status"],
       page: params["page"],
       page_size: params["page_size"]

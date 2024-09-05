@@ -9,7 +9,10 @@ defmodule Challenge.Permits do
   alias Challenge.Permits.Permit
 
   @type page_opt ::
-          {:page, integer()} | {:page_size, integer()} | {:q, String.t()} | {:status, String.t()}
+          {:page, integer()}
+          | {:page_size, integer()}
+          | {:search, String.t()}
+          | {:status, String.t()}
   @type page_opts :: [page_opt()]
 
   @doc """
@@ -42,7 +45,7 @@ defmodule Challenge.Permits do
   ## Options
   * `:page` - the page number to load, defaults to 1
   * `:page_size` - the number of entries per page, defaults to 20
-  * `:q` - search term to query for
+  * `:search` - search term to query for
   * `:status` - status to filter the results by
   """
   @spec page_permits(page_opts()) :: Scrivener.Page.t(Permit.t())
@@ -66,10 +69,10 @@ defmodule Challenge.Permits do
     Enum.reduce(filters, query, &filter_query/2)
   end
 
-  # Filter by the value of :q. It can be contained in
+  # Filter by the value of :search. It can be contained in
   # any of location_description, permit_number, permit_holder,
   # or food_items and is a case insensitive comparison.
-  defp filter_query({:q, v}, query) do
+  defp filter_query({:search, v}, query) do
     contains_v = "%#{v}%"
 
     from [permit: permit] in query,
