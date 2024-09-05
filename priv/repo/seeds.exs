@@ -1,11 +1,14 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Challenge.Repo.insert!(%Challenge.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+# Seed from permits.csv in the same directory as this file.
+result =
+  "#{__DIR__}/permits.csv"
+  |> File.stream!()
+  |> Challenge.CSVSource.stream_permits()
+  |> Challenge.Seeder.seed_permits()
+
+case result do
+  :ok ->
+    :ok
+
+  {:error, %Ecto.Changeset{} = changeset} ->
+    raise Ecto.InvalidChangesetError, action: :seed, changset: changeset
+end
