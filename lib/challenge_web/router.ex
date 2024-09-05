@@ -7,6 +7,8 @@ defmodule ChallengeWeb.Router do
 
   scope "/api", ChallengeWeb do
     pipe_through :api
+
+    get "/permits", PermitController, :index
   end
 
   # Enable LiveDashboard in development
