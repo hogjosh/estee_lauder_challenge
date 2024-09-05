@@ -1,7 +1,7 @@
-defmodule Challenge.CSVSeedTest do
+defmodule Challenge.CSVSourceTest do
   use ExUnit.Case, async: true
 
-  alias Challenge.CSVSeed
+  alias Challenge.CSVSource
 
   describe "stream_permits/1" do
     csv = [
@@ -11,7 +11,7 @@ defmodule Challenge.CSVSeedTest do
 
     assert [permit] =
              csv
-             |> CSVSeed.stream_permits()
+             |> CSVSource.stream_permits()
              |> Enum.to_list()
 
     assert %{

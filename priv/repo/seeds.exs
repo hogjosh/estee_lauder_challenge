@@ -1,15 +1,14 @@
-# Use permits.csv in the same directory as this file.
-# Commit to the database in chunks.
-# Note that the seed operation is idempotent, and thus
-# can be re-run safely.
-"#{__DIR__}/permits.csv"
-|> File.stream!()
-|> Challenge.CSVSeed.stream_permits()
-|> Stream.chunk_every(100)
-|> Enum.each(fn chunk ->
-  Challenge.Repo.transaction(fn ->
-    Enum.each(chunk, fn attrs ->
-      {:ok, _permit} = Challenge.Permits.upsert_permit(attrs)
-    end)
-  end)
-end)
+# Seed from permits.csv in the same directory as this file.
+result =
+  "#{__DIR__}/permits.csv"
+  |> File.stream!()
+  |> Challenge.CSVSource.stream_permits()
+  |> Challenge.Seeder.seed_permits()
+
+case result do
+  :ok ->
+    :ok
+
+  {:error, %Ecto.Changeset{} = changeset} ->
+    raise Ecto.InvalidChangesetError, action: :seed, changset: changeset
+end

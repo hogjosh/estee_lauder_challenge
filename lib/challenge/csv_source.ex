@@ -1,4 +1,4 @@
-defmodule Challenge.CSVSeed do
+defmodule Challenge.CSVSource do
   # Use the included CSV parser based on RFC4180
   alias NimbleCSV.RFC4180, as: CSV
 
